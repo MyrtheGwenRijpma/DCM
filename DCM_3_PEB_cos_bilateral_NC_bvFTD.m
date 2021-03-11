@@ -5,7 +5,7 @@ addpath('/shared/macdata/groups/rankin/Users/Myrthe/2019/rSMS_DCM/RSMS-DCM/DCMsc
 %% Set directories and files
 pathFolder = '/shared/macdata/groups/rankin/rsfMRI_Library';
 dcm_model = 'SN_bilateral'; % all 10 SN ROIs (bilateral)
-dcm_general = fullfile('/shared/macdata/groups/rankin/Users/Myrthe/2019/rSMS_DCM/RSMS-DCM/models/SN_bilateral/SN_level3');
+dcm_general = fullfile('/shared/macdata/groups/rankin/Users/Myrthe/2019/rSMS_DCM/RSMS-DCM/models/SN_bilateral/SN_level3'); % change name based on the analysis, e.g., SN_bvFTD/SN_NC 
 dcm_results = fullfile(dcm_general,'DCM_results');
 
 % subject DCM file
