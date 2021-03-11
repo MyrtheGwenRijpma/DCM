@@ -1,30 +1,27 @@
-%% Set directories
-% cd '/shared/macdata/groups/rankin/Users/Gianina/rsFMRI/DCM/'; % change directory
+%% Set directories for datasets
 main_dir = '/shared/macdata/groups/rankin/rsfMRI_Library/';
 glmpath = 'GLM_cos';
 
-%% Get Subjects list
-% Opening File directory 
-% Excel spreadsheet with PIDN, DCDate
-[Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the EXCEL file');
+% Opening excel spreadsheet with PIDN, DCDate named 'Sample_NC_bvFTD_8mm_2020'
+[Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the PIDN DCDate EXCEL file');
 MCINT = readtable(fullfile(PathName,Filename));
 
-% Create PIDN_DCDATE
+% formatting PIDN
 pidn = num2str(MCINT.PIDN);
 pidn2 = cellstr(pidn);
 pidn3 = regexprep(pidn2, '\W', '');
 
-% changing format of the date
+% formatting DCDATE
 date_input = datetime(MCINT.DCDate,'ConvertFrom','excel');
 formatOut = 'mmddyyyy';
 DCDate = datestr(date_input,formatOut);
 
-%PIDNs = MCINT.PIDN_DCDATE; % PIDN_DCDATE variable
+% create subject variable
 subj = strcat(pidn3,'_',DCDate);
 
 %% Set parameters
 TR = 2; 
-n_vol = 235; % specify accordingly 
+n_vol = 235;
 
 %% Initialise SPM
 %--------------------------------------------------------------------------
