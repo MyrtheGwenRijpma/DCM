@@ -1,18 +1,15 @@
-%% Add paths SPM12_new and funtions
-addpath('/smb://MAC-SRV-NAS2.UCSF.EDU/macdata/groups/rankin/spm12_new')
+%% Set paths
+addpath('/shared/macdata/groups/rankin/spm12_new')
 addpath('/shared/macdata/groups/rankin/Users/Myrthe/2019/rSMS_DCM/RSMS-DCM/DCMscripts/functions')
 
 %% Set directories and files
-% Change the folder names according to the model
-pathFolder = '/shared/macdata/groups/rankin/rsfMRI_Library/';
-dcm_model = 'SN_bilateral'; % This is where we need to change name according to specified model
+pathFolder = '/shared/macdata/groups/rankin/rsfMRI_Library';
+dcm_model = 'SN_bilateral'; % all 10 SN ROIs (bilateral)
 dcm_general = fullfile('/shared/macdata/groups/rankin/Users/Myrthe/2019/rSMS_DCM/RSMS-DCM/models/SN_bilateral/SN_level3');
-dcm_folder = fullfile(dcm_general,'DCM_files');
-dcm_results = fullfile(dcm_general,'DCM_results'); %change according to covariates and subject#
-PEB3_results = fullfile('Users/mrijpma/Desktop/barchart_DCM');
+dcm_results = fullfile(dcm_general,'DCM_results');
 
 % subject DCM file
-subj_dcm_file = 'SN_bilateral.mat';
+subj_dcm_file = 'SN_bilateral.mat'; %DCM for all 10 SN nodes selected (bilaterally)
 
 %Check if DCM folder exist
 if exist(dcm_folder,'dir') == 7 
@@ -30,54 +27,47 @@ else % Create folder!
     disp('Folder created!')
 end
 
-% List all directories (correspond to the subject names)
+%----------------------------------------%
 
-%% Get PIDN_DCDate
-
-% Opening File directory
+% Opening excel spreadsheet with PIDN, DCDate named 'Sample_NC_bvFTD_8mm_2020'
 [Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the EXCEL file');
 MCINT = readtable(fullfile(PathName,Filename));
 
-% Creating PIDN_DCDATE
+% formatting PIDN
 pidn = num2str(MCINT.PIDN);
 pidn2 = cellstr(pidn);
 pidn3 = regexprep(pidn2, '\W', '');
 
-% changing format of the date
+% formatting DCDATE
 date_input = datetime(MCINT.DCDate,'ConvertFrom','excel');
 formatOut = 'mmddyyyy';
 DCDate = datestr(MCINT.DCDate,formatOut);
 
-%PIDNs = MCINT.PIDN_DCDATE; % PIDN_DCDATE variable
+% create subject variable
 subj_all = strcat(pidn3,'_',DCDate);
-
 MCINT.PIDN_DCDate = subj_all;
-% clear unwanted variables
 clear pidn pidn2 pidn3 subj_all formatOut Filename PathName date_input DCDate
 
-%% SUBJECT FILTER, AND SORT
-subjmatrix = [MCINT.PIDN_DCDate, MCINT.Dx, cellstr(num2str(MCINT.RSMS))]; % RSMS as covariate
-
-% Sort
+% filter and sort subjects
+subjmatrix = [MCINT.PIDN_DCDate, MCINT.Dx];
 [~,idx] = sort(subjmatrix(:,2));
-nc_bvftd_matr_sort = subjmatrix(idx,:); % Gets table
-
+nc_bvftd_matr_sort = subjmatrix(idx,:); % generating table of bvFTDs and NC subjects
 subj = nc_bvftd_matr_sort(:,1);
 
-% Get number of NCs and bvFTDs
+% Retrieve the number of NCs and bvFTDs
 n_nc = nnz(strcmp(nc_bvftd_matr_sort(:,2),'NC'));
 n_bvftd = nnz(strcmp(nc_bvftd_matr_sort(:,2),'bvFTD'));
 
-% Filter for each Dx group
+% Filter per DX group
 nc_matr = nc_bvftd_matr_sort(strcmp(nc_bvftd_matr_sort(:,2),'NC'),:);
 subj_NC = nc_matr(:,1);
 
 bvFTD_matr = nc_bvftd_matr_sort(strcmp(nc_bvftd_matr_sort(:,2),'bvFTD'),:);
 subj_bvFTD = bvFTD_matr(:,1);
 
+%----------------------------------------%
 
-%% Get ROIs list
-% Opening File directory
+%% Retrieve ROIs under the file name: 'ROIs_full_8mm'
 [Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the ROI file');
 ROItable = readtable(fullfile(PathName,Filename));
 
@@ -90,10 +80,7 @@ for i = 1:height(ROItable)
     counter = counter + 6;
 end
 
-%% Moving interested DCM_rest.mat into another folder
-
-% I copy all the DCMs I am interested in a different folder
-
+%% Moving DCM_rest.mat files of interest into another folder
 for ii=1:size(subj,1)
    
     % change this accordingly to _rest or _cort
