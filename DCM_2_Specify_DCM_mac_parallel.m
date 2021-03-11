@@ -25,7 +25,7 @@ DCDate = datestr(date_input,formatOut);
 % create subject variable
 subj = strcat(pidn3,'_',DCDate);
 
-%% Retrieve ROIs
+%% Retrieve ROIs under the file name: 'ROIs_full_8mm'
 [Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the ROI file');
 ROItable = readtable(fullfile(PathName,Filename));
 
