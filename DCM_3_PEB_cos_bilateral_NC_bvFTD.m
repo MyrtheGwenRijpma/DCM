@@ -29,7 +29,7 @@ end
 
 %----------------------------------------%
 
-% Opening excel spreadsheet with PIDN, DCDate named 'Sample_NC_bvFTD_8mm_2020'
+%% Opening excel spreadsheet with PIDN, DCDate named 'Sample_NC_bvFTD_8mm_2020'
 [Filename,PathName] = uigetfile({'*.xlsx';'*.xls';'*.*'},'Select the EXCEL file');
 MCINT = readtable(fullfile(PathName,Filename));
 
@@ -80,7 +80,7 @@ for i = 1:height(ROItable)
     counter = counter + 6;
 end
 
-%% Moving DCM_rest.mat files of interest into another folder
+% Moving DCM_rest.mat files of interest into another folder
 for ii=1:size(subj,1)
    
     % change this accordingly to _rest or _cort
@@ -98,7 +98,7 @@ GCM_NC = fullfile(dcm_folder,strcat('DCM_',subj_NC,'_',subj_dcm_file));
 GCM_bvFTD = fullfile(dcm_folder,strcat('DCM_',subj_bvFTD,'_',subj_dcm_file));
 
 
-%% Estimate a first level PEB
+% Estimate a first level PEB
 tic; [GCM_NC, DCM_NC] = spm_dcm_peb_fit(GCM_NC); toc;
 tic; [GCM_bvFTD, DCM_bvFTD] = spm_dcm_peb_fit(GCM_bvFTD); toc;
 
@@ -107,7 +107,7 @@ tic; [GCM_bvFTD, DCM_bvFTD] = spm_dcm_peb_fit(GCM_bvFTD); toc;
 save(fullfile(dcm_results,'GCM_DCM_fit_NC.mat'), 'GCM_NC');
 save(fullfile(dcm_results,'GCM_DCM_fit_bvFTD.mat'), 'GCM_bvFTD');
 
-%% Put first level DCM parameters into an excel spreadsheet (correlation and prediction)
+% Put first level DCM parameters into an excel spreadsheet (correlation and prediction)
 [subCM_NC, subPM_NC] = getCMPM(GCM_NC, nc_matr, rois);
 [subCM_bvFTD, subPM_bvFTD] = getCMPM(GCM_bvFTD, bvFTD_matr, rois);
 %[subCM_NC, subPM_NC] = getCMPM(GCM_NC, nc_matr(:,1:2), rois);
@@ -186,7 +186,7 @@ spm_dcm_peb_review(PEB3, GCMs);
 save(fullfile(dcm_results,'GCM_DCM_fit_PEB3.mat'), 'GCMs');
 save(fullfile(dcm_results,'PEB_DCM_fit_PEB3.mat'), 'PEBs');
 
-%% Get group parameters
+% Get group parameters
 totalparams = length(rois)*2;
 BMA_Ep = BMA.Ep(length(rois)+1:totalparams);
 BMA_Ep = full(BMA_Ep);
