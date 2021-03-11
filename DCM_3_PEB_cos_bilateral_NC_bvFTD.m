@@ -90,30 +90,14 @@ for ii=1:size(subj,1)
 
 end
 
+%----------------------------------------%
+
 % Collate DCMs into a GCM file
 GCM_NC = fullfile(dcm_folder,strcat('DCM_',subj_NC,'_',subj_dcm_file));
 GCM_bvFTD = fullfile(dcm_folder,strcat('DCM_',subj_bvFTD,'_',subj_dcm_file));
 
+
 %% Estimate a first level PEB
-
-% Fully estimate model
-% for ii=1:size(GCM,1)
-%     GCM(:,ii) = spm_dcm_fit(GCM(:,ii)); 
-% end
-
-% Fully estimate model
-% use_parfor = true ;
-% GCM = spm_dcm_fit ( GCM , use_parfor ) ;
-
-
-% Use Bayesian Model Reduction to rapidly estimated DCMs 2-N for each subject if applicable
-% if size(GCM,2) > 1
-%    GCM = spm_dcm_bmr(GCM);
-% end
-
-% alternate between estimating DCMs and estimating group effects. 
-% This is slower, but can draw subjects out of local optima towards the group mean.
-
 tic; [GCM_NC, DCM_NC] = spm_dcm_peb_fit(GCM_NC); toc;
 tic; [GCM_bvFTD, DCM_bvFTD] = spm_dcm_peb_fit(GCM_bvFTD); toc;
 
@@ -122,40 +106,20 @@ tic; [GCM_bvFTD, DCM_bvFTD] = spm_dcm_peb_fit(GCM_bvFTD); toc;
 save(fullfile(dcm_results,'GCM_DCM_fit_NC.mat'), 'GCM_NC');
 save(fullfile(dcm_results,'GCM_DCM_fit_bvFTD.mat'), 'GCM_bvFTD');
 
-%% Put first level DCM parameters into an excel spreadsheet
-% for i = 1:size(subj,1)
-%     subCM(i,:) = GCM{i}.Ep.A(:)'; % Connectivity matrix
-%     subPM(i,:) = GCM{i}.Pp.A(:)'; % Probability matrix
-% end
-% 
-% subCM = num2cell(subCM);
-% subPM = num2cell(subPM);
-% 
-% % Combine matrix and demographics
-% subCM_table = [nc_bvftd_matr_sort, subCM];
-% subPM_table = [nc_bvftd_matr_sort, subPM];
-% subCM_table = cell2table(subCM_table, 'VariableNames',['PIDN_DCDate' 'Dx' rois]);
-% subPM_table = cell2table(subPM_table, 'VariableNames',['PIDN_DCDate' 'Dx' rois]);
-
+%% Put first level DCM parameters into an excel spreadsheet (correlation and prediction)
 [subCM_NC, subPM_NC] = getCMPM(GCM_NC, nc_matr, rois);
 [subCM_bvFTD, subPM_bvFTD] = getCMPM(GCM_bvFTD, bvFTD_matr, rois);
-
-[subCM_NC, subPM_NC] = getCMPM(GCM_NC, nc_matr(:,1:2), rois);
+%[subCM_NC, subPM_NC] = getCMPM(GCM_NC, nc_matr(:,1:2), rois);
 
 % Save to excel for NC
-writetable(subCM_NC,fullfile(dcm_results,'SN_right_hemi_subCM_NC.csv'));
-writetable(subPM_NC,fullfile(dcm_results,'SN_right_hemi_subPM_NC.csv'));
+writetable(subCM_NC,fullfile(dcm_results,'SN_bi_subCM_NC.csv'));
+writetable(subPM_NC,fullfile(dcm_results,'SN_bi_subPM_NC.csv'));
 
-% Save for bvFTD
-writetable(subCM_bvFTD,fullfile(dcm_results,'SN_right_hemi_subCM_NC.csv'));
-writetable(subPM_bvFTD,fullfile(dcm_results,'SN_right_hemi_subPM_NC.csv'));
+% Save to excel for bvFTD
+writetable(subCM_bvFTD,fullfile(dcm_results,'SN_bi_subCM_NC.csv'));
+writetable(subPM_bvFTD,fullfile(dcm_results,'SN_bi_subPM_NC.csv'));
 
-
-[subCM, subPM] = getCMPM(GCMs, subjmatrix(:,1:2), rois);
-writetable(subCM,fullfile(dcm_results,'SN_right_hemi_subCM3.csv'));
-writetable(subPM,fullfile(dcm_results,'SN_right_hemi_subPM3.csv'));
-
-
+%----------------------------------------%
 
 %% Estimate a second level PEB (Parametric Empirical Bayes) model - include RSMS
 % Specify PEB model settings
