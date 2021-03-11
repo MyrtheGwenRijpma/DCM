@@ -92,6 +92,7 @@ end
 
 %----------------------------------------%
 
+%%first level PEB
 % Collate DCMs into a GCM file
 GCM_NC = fullfile(dcm_folder,strcat('DCM_',subj_NC,'_',subj_dcm_file));
 GCM_bvFTD = fullfile(dcm_folder,strcat('DCM_',subj_bvFTD,'_',subj_dcm_file));
@@ -121,7 +122,7 @@ writetable(subPM_bvFTD,fullfile(dcm_results,'SN_bi_subPM_NC.csv'));
 
 %----------------------------------------%
 
-%% Estimate a second level PEB (Parametric Empirical Bayes) model - include RSMS
+%% Second level PEB
 % Specify PEB model settings
 M = []; 
 M = struct();
@@ -132,43 +133,31 @@ M.hc = 1/16;
 M.Q = 'single';
 
 % Specifiy the design matrix. It should start with a constant column (1).
+NC = str2double(nc_matr(:,3));
+bvFTD = str2double(bvFTD_matr(:,3)); 
 
-% Create design matrix
-RSMS_NC = str2double(nc_matr(:,3)); %define RSMS: e.g. [67;50;51]
-RSMS_bvFTD = str2double(bvFTD_matr(:,3)); %define RSMS: e.g. [67;50;51]
-
-% RSMS main regressor for NC
+% grand mean NC
 M.X = [ones(n_nc,1), ...  % grand mean
-    RSMS_NC];      % RSMS regressor
     
 % Choose a field
 field = {'A'};
 
 % Estimate second level PEB for NC
 PEB_NC = spm_dcm_peb(GCM_NC,M,field);
-save(fullfile(dcm_results,'PEB_RSMS_NC.mat'), 'PEB_NC');
+save(fullfile(dcm_results,'PEB2_NC.mat'), 'PEB_NC');
 
-% RSMS main regressor for bvFTD
+% grand mean bvFTD
 M.X = [ones(n_bvftd,1), ...  % grand mean
-    RSMS_bvFTD];      % RSMS regressor
-
 
 % Estimate second level PEB for bvFTD
 PEB_bvFTD = spm_dcm_peb(GCM_bvFTD,M,field);
-save(fullfile(dcm_results,'PEB_RSMS_bvFTD.mat'), 'PEB_bvFTD');
+save(fullfile(dcm_results,'PEB2_bvFTD.mat'), 'PEB_bvFTD');
 
-
-% Compare nested PEB models. Decide which connections to switch off based on the 
-% structure of each DCM for subject 1.
-% BMA = spm_dcm_peb_bmc(PEB(1), GCM(1,:));
-
-% Search over nested models
-% Rather than compare specific hypotheses, 
-% you may wish to simply prune away any parameters from the PEB which don't contribute to the model evidence.
+% Bayesian Model Averaging (both DX groups)
 BMA_NC = spm_dcm_peb_bmc(PEB_NC);
 BMA_bvFTD = spm_dcm_peb_bmc(PEB_bvFTD);
-save(fullfile(dcm_results,'BMA_RSMS_NC.mat'), 'BMA_NC');
-save(fullfile(dcm_results,'BMA_RSMS_bvFTD.mat'), 'BMA_bvFTD');
+save(fullfile(dcm_results,'BMA_NC.mat'), 'BMA_NC');
+save(fullfile(dcm_results,'BMA_bvFTD.mat'), 'BMA_bvFTD');
 
 % Review results for PEB and BMA
 spm_dcm_peb_review(BMA_NC,GCM_NC);
@@ -177,15 +166,19 @@ spm_dcm_peb_review(BMA_bvFTD,GCM_bvFTD);
 % Perform leave-one-out cross validation (GCM,M,field are as before)
 class=spm_dcm_loo(GCM,M,field);
 
-%% Third Level PEB
+%----------------------------------------%
 
+%% Third Level PEB
+% specificy design matrix for NC and bvFTD combined (third PEB)
 X3 = [ones(n_nc+n_bvftd,1),cat(1,ones(n_nc,1)*-1,ones(n_bvftd,1)*1)];
 M.X = X3;
 PEBs = {PEB_NC; PEB_bvFTD};
 PEB3 = spm_dcm_peb(PEBs,X3);
 
-% BMA_difference = spm_dcm_peb(PEB3);
+%Bayesian Model Averaging for third PEB
+BMA_difference = spm_dcm_peb(PEB3);
 
+%GCM file for NCa nd bvFTD combined
 GCMs = [GCM_NC; GCM_bvFTD];
 spm_dcm_peb_review(PEB3, GCMs);
 
